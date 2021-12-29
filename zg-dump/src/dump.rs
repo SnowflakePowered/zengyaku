@@ -47,7 +47,7 @@ pub(crate) fn dump_sha1<T: Seek + Read>(read: &mut BufReader<T>, off: u32, stop:
     Ok(results)
 }
 
-pub(crate) fn dump_name_addr<T: Seek + Read>(read: &mut BufReader<T>, off: u32, stop: usize) -> anyhow::Result<Vec<u32>>{
+fn dump_name_addr<T: Seek + Read>(read: &mut BufReader<T>, off: u32, stop: usize) -> anyhow::Result<Vec<u32>>{
     let mut results = Vec::new();
     results.reserve(stop);
     read.seek(SeekFrom::Start(off.into()))?;
@@ -71,7 +71,7 @@ pub(crate) fn dump_names<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u
 
     for addr in addrs {
         read.seek(SeekFrom::Start((addr - 0x400c00).into()))?;
-        let name = read.parse(parse_name).map_err(|_e| anyhow::Error::msg("nom error"))?;
+        let name = read.parse(parse_name).map_err(|e| anyhow::Error::msg(format!("Failed to parse name table ({:?})", e)))?;
         res.push(name);
     }
     Ok(res)

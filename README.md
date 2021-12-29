@@ -2,8 +2,6 @@
 
 GoodTools reverse engineering research project. 
 
-Tested against GoodNES and GoodSNES V3.23b
-
 ## Suite
 `zg` tools only work with **unpacked** GoodTools executables. The executable can be unpacked with [x32dbg](https://x64dbg.com) and the Scylla plugin.
 
@@ -13,52 +11,43 @@ The first entry is the first line in the `*Miss.txt` file when GoodTools is ran 
 The hash of the first entry can be found with [OpenGood](https://github.com/SnowflakePowered/opengood), unless if the first entry is missing; in that case, it will have to be determined manually with a reverse engineering suite.
 
 ```
-GoodTools Address Finder
+zengyaku-find: GoodTools Address Finder
 
 USAGE:
-    zg-find.exe --crc <CRC> --sha1 <SHA1> --name <NAME> <EXE>
+    zg-find.exe [OPTIONS] --crc <CRC> --sha1 <SHA1> --name <NAME> <EXE>
 
 ARGS:
-    <EXE>
-            The name of the executable to dump
+    <EXE>    The path to the executable to search
 
 OPTIONS:
-    -c, --crc <CRC>
-            The CRC32 value to search for
-
-    -h, --help
-            Print help information
-
-    -n, --name <NAME>
-            The name to search for
-
-    -s, --sha1 <SHA1>
-            The SHA1 value to search for
-
-    -V, --version
-            Print version information
+    -c, --crc <CRC>      The CRC32 value to search for
+    -C, --print-args     Output command-line arguments for zg-dump
+    -h, --help           Print help information
+    -n, --name <NAME>    The name string to search for
+    -s, --sha1 <SHA1>    The SHA1 value to search for
+    -V, --version        Print version information
 ```
 
 ### zg-dump
-Dumps CRC32 and SHA1 hashes given the known offsets of each table.
+Dumps CRC32 and SHA1 hashes given the known offsets of each table and the number of known ROMs.
 
 ```
-GoodTools Database Dumper
+zengyaku-dump: GoodTools database dumper
 
 USAGE:
-    zg-dump.exe [OPTIONS] --crc-off <CRC_OFF> --sha1-off <SHA1_OFF> --name-off <NAME_OFF> --known-num <KNOWN_NUM> <EXE> [FORMAT]
+    zg-dump.exe [OPTIONS] --crc-off <CRC_OFF> --sha1-off <SHA1_OFF> --name-off <NAME_OFF> --known-num <KNOWN_NUM> <EXE>
 
 ARGS:
-    <EXE>       The name of the executable to dump
-    <FORMAT>    Output format [default: none] [possible values: none, tsv, xml]
+    <EXE>    The path to the executable to dump
 
 OPTIONS:
     -c, --crc-off <CRC_OFF>        The offset of the CRC32 table
-    -e, --extension <EXTENSION>    [default: ]
+    -e, --extension <EXTENSION>    The extension to use when saving an Logiqx XML file; if omitted, emits no file extensions in the resulting `rom` entries [default: ]
+    -f, --format <FORMAT>          The format to output results [default: none] [possible values: none, tsv, xml]
     -h, --help                     Print help information
-    -k, --known-num <KNOWN_NUM>    Total number of known ROMs
+    -k, --known-num <KNOWN_NUM>    The total number of known ROMs
     -n, --name-off <NAME_OFF>      The offset of the name table
-    -o, --output <OUTPUT>          The name of the executable to dump
+    -o, --output <OUTPUT>          The path to write output; if omitted, outputs to stdout
     -s, --sha1-off <SHA1_OFF>      The offset of the SHA1 table
     -V, --version                  Print version information
 ```

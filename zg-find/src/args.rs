@@ -44,13 +44,11 @@ pub(crate) enum OutputFormat {
     Xml,
 }
 
-/// GoodTools Address Finder
-/// 
-/// Must be run on an unpacked executable.
+/// zengyaku-find: GoodTools Address Finder
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
 pub(crate) struct Args {
-    /// The name of the executable to dump
+    /// The path to the executable to search.
     #[clap(parse(try_from_os_str = validate_file_exists))]
     pub(crate) exe: PathBuf,
 
@@ -62,7 +60,11 @@ pub(crate) struct Args {
     #[clap(short, long, parse(try_from_str = try_hex_to_sha))]
     pub(crate) sha1: [u8; 20],
 
-    /// The name to search for.
+    /// The name string to search for.
     #[clap(short, long)]
     pub(crate) name: String,
+
+    /// Output command-line arguments for zg-dump.
+    #[clap(short='C', long)]
+    pub(crate) print_args: bool,
 }
