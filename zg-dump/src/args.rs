@@ -47,7 +47,7 @@ pub(crate) struct Args {
     pub(crate) known_num: usize,
 
     /// Output format
-    #[clap(arg_enum, default_value_t = OutputFormat::None)]
+    #[clap(short, long, arg_enum, default_value_t = OutputFormat::None)]
     pub(crate) format: OutputFormat,
 
     /// The name of the executable to dump
