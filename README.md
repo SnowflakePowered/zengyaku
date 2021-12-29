@@ -70,7 +70,19 @@ OPTIONS:
 3. Use `zg-find` to find the offsets of the first entry.
 4. Use `zg-dump` to dump the database once the offsets are found.
 
-## Legal
-zengyaku is licensed under the MIT License.
+## Frequently Asked Questions
 
-Unlike OpenGood, using zengyaku violates clause 3 of the GoodTools license. zengyaku is provided for educational purposes only.
+### Doesn't this violate the GoodTools license?
+There is nothing really *specific* to GoodTools in zengyaku's code; at its core it just searches an executable for some patterns, then tries to make sense of it. If you feed `zg-find` or `zg-dump` other executables in all likelyhood it will dump out some (albeit questionable) output. However, if you unpack a GoodTools EXE with a debugger, then run zengyaku on the result, that pretty clearly violates clause 3, if you care. For that reason, I do not publish any database information extracted directly from the GoodTools executable here.
+
+### Should I use this?
+Outside of intellectual curiosity, most definitely not. GoodTools does not contain any size or file extension information that [OpenGood](https://github.com/SnowflakePowered/opengood) provides for the same set of ROMs. OpenGood is also clearly not in violation of the GoodTools license as the information there was not directly extracted from the GoodTools executable, whereas zengyaku can be used to do so.
+
+### Will you provide executables?
+No, zengyaku is a source-only distribution. If you have trouble setting up a Rust toolchain, please take a look at [OpenGood](https://github.com/SnowflakePowered/opengood) and see if that would better fit your use case.
+
+### Will you publish the extracted database?
+Please take a look at [OpenGood](https://github.com/SnowflakePowered/opengood) and see if that would better fit your use case. While there are some missing ROMs owing to the nature of how OpenGood's data was collected, OpenGood provides additional information like file size and MD5 hashes as well. Publishing a database extracted directly from GoodTools is clearly in violation of clause 3 of the GoodTools license.
+
+## Legal
+zengyaku is licensed under the MIT License and is provided for educational purposes only.
