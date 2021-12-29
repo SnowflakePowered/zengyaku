@@ -1,0 +1,12 @@
+[package]
+name = "zg-find"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+clap = { version = "3.0.0-rc.9", features = ["derive"] }
+hex = "0.4"
+anyhow = "1"
+bytes = "1"
+memchr = "2"
