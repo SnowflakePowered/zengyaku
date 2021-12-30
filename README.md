@@ -19,7 +19,7 @@ Any necessary hashes for 'new-style' databases can be looked up with [OpenGood](
 
 For example, to find offsets for GoodWSx (new-style)
 ```bash
-$ zg-dump "GoodWSx_unpacked.exe" new --crc "2cbe41a6" --sha1 "28a0e1bccc4c10a57379f87c67c6c5ecf07fb0f4" --name "#Wonderwitch Promo Beta Demo by Dox (PD)"     
+$ zg-find "GoodWSx_unpacked.exe" new --crc "2cbe41a6" --sha1 "28a0e1bccc4c10a57379f87c67c6c5ecf07fb0f4" --name "#Wonderwitch Promo Beta Demo by Dox (PD)"     
 ```
 
 For GoodPico (old-style)
