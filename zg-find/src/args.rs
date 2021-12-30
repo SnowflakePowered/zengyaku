@@ -10,6 +10,9 @@ fn validate_file_exists(s: &OsStr) -> Result<PathBuf, std::io::Error> {
     Err(std::io::Error::new(std::io::ErrorKind::NotFound, "File not found or not a file."))
 }
 
+fn try_hex_to_u32(s: &str) -> Result<u32, ParseIntError> {
+    u32::from_str_radix(s, 16)
+}
 
 fn try_hex_to_crc(s: &str) -> Result<[u8; 4], ParseIntError> {
     let int = u32::from_str_radix(s, 16)?;
@@ -37,8 +40,6 @@ fn try_hex_to_sha(s: &str) -> Result<[u8; 20], anyhow::Error> {
     Ok(buf)
 }
 
-
-
 /// zengyaku-find: GoodTools Address Finder
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
@@ -51,6 +52,10 @@ pub(crate) struct Args {
     #[clap(short='C', long)]
     pub(crate) print_args: bool,
 
+     /// Base address to use when doing pointer calculations.
+     #[clap(long, default_value = "400c00", display_order=1000, parse(try_from_str = try_hex_to_u32))]
+     pub(crate) base_address: u32,
+
     #[clap(subcommand)]
     pub(crate) command: GoodToolsVersion
 }
@@ -58,6 +63,7 @@ pub(crate) struct Args {
 #[derive(Debug, Subcommand)]
 pub(crate) enum GoodToolsVersion {
     /// Find offsets for a version 3.2x database
+    #[clap(display_order=0)]
     New {
         /// The CRC32 value to search for.
         #[clap(short, long, parse(try_from_str = try_hex_to_crc))]
@@ -77,6 +83,7 @@ pub(crate) enum GoodToolsVersion {
             .required(true)
             .args(&["crc", "name"]),
     ))]
+    #[clap(display_order=0)]
     Old {
         /// The CRC32 value to search for.
         #[clap(short, long, parse(try_from_str = try_hex_to_crc))]

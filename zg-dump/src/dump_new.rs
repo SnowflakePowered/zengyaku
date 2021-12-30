@@ -60,7 +60,7 @@ fn dump_name_addr<T: Seek + Read>(read: &mut BufReader<T>, off: u32, stop: usize
     Ok(results)
 }
 
-fn dump_names<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop: usize) -> anyhow::Result<Vec<String>>{
+fn dump_names<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop: usize, base: u32) -> anyhow::Result<Vec<String>>{
     
     fn parse_name(i: &[u8]) -> nom::IResult<&[u8], String, ()>{
         let (i, res) = take_till(|c| c == 0)(i)?;
@@ -71,7 +71,7 @@ fn dump_names<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop: u
     let mut res = Vec::new();
 
     for addr in addrs {
-        read.seek(SeekFrom::Start((addr - 0x400c00).into()))?;
+        read.seek(SeekFrom::Start((addr - base).into()))?;
         let name = read.parse(parse_name).map_err(|e| anyhow::Error::msg(format!("Failed to parse name table ({:?})", e)))?;
         res.push(name);
     }
@@ -89,10 +89,10 @@ fn collect(crc: Vec<CRC32>, sha1: Vec<SHA1>, names: Vec<String>) -> Vec<Entry> {
     res
 }
 
-pub(crate) fn dump<'a, T: Seek + Read >(read: &'a mut BufReader<T>, crc_off: u32, sha1_off: u32, name_off: u32, known_num: usize) -> anyhow::Result<Vec<Entry>> {
+pub(crate) fn dump<'a, T: Seek + Read >(read: &'a mut BufReader<T>, crc_off: u32, sha1_off: u32, name_off: u32, known_num: usize, base: u32) -> anyhow::Result<Vec<Entry>> {
     let crc32 = dump_crc(read, crc_off, known_num)?;
     let sha1 = dump_sha1(read, sha1_off,known_num)?;
-    let names = dump_names(read, name_off, known_num)?;
+    let names = dump_names(read, name_off, known_num, base)?;
 
     if [crc32.len(), sha1.len(), names.len()] != [known_num, known_num, known_num] {
         return Err(anyhow::Error::msg("Mismatched number of items"));

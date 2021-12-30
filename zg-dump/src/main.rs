@@ -26,13 +26,13 @@ fn main() -> anyhow::Result<()> {
         if args.format.is_none() || args.output.is_some() {
             println!("Analyzing new-style database {:?} crc={} sha1={} name={} for {} entries", args.exe, args.crc_off.unwrap(), args.sha1_off.unwrap(), args.name_off.unwrap(), args.known_num);
         }
-        dump_new::dump(&mut read, args.crc_off.unwrap(), args.sha1_off.unwrap(), args.name_off.unwrap(), args.known_num)?
+        dump_new::dump(&mut read, args.crc_off.unwrap(), args.sha1_off.unwrap(), args.name_off.unwrap(), args.known_num, args.base_address)?
     } else {
         if args.format.is_none() || args.output.is_some() {
             println!("Analyzing old-style database {:?} entry={} for {} entries", args.exe, args.entry_off.unwrap(), args.known_num);
         }
 
-        dump_old::dump(&mut read,args.entry_off.unwrap(), args.known_num)?
+        dump_old::dump(&mut read,args.entry_off.unwrap(), args.known_num, args.base_address)?
     };
 
     match args.format {

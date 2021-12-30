@@ -23,7 +23,7 @@ fn dump_entry_addr<T: Seek + Read>(read: &mut BufReader<T>, off: u32, stop: usiz
     Ok(results)
 }
 
-fn dump_entries<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop: usize) -> anyhow::Result<Vec<String>>{
+fn dump_entries<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop: usize, base: u32) -> anyhow::Result<Vec<String>>{
     
     fn parse_cstring(i: &[u8]) -> nom::IResult<&[u8], String, ()>{
         let (i, res) = take_till(|c| c == 0)(i)?;
@@ -34,7 +34,7 @@ fn dump_entries<'a, T: Seek + Read >(read: &'a mut BufReader<T>, off: u32, stop:
     let mut res = Vec::new();
 
     for addr in addrs {
-        read.seek(SeekFrom::Start((addr - 0x400c00).into()))?;
+        read.seek(SeekFrom::Start((addr - base).into()))?;
         let name = read.parse(parse_cstring).map_err(|e| anyhow::Error::msg(format!("Failed to parse name table ({:?})", e)))?;
         res.push(name);
     }
@@ -88,9 +88,9 @@ fn parse_entry(input: &str) -> IResult<&str, Entry> {
     Ok((input, Entry { crc, name: String::from(name), sha1 }))
 }
 
-pub(crate) fn dump<'a, T: Seek + Read >(read: &'a mut BufReader<T>, entry_off: u32, known_num: usize) -> anyhow::Result<Vec<Entry>> {
+pub(crate) fn dump<'a, T: Seek + Read >(read: &'a mut BufReader<T>, entry_off: u32, known_num: usize, base: u32) -> anyhow::Result<Vec<Entry>> {
     
-    let entries= dump_entries(read, entry_off, known_num)?;
+    let entries= dump_entries(read, entry_off, known_num, base)?;
     let mut results = Vec::new();
     for e in entries.iter() {
         let (_s, e) = parse_entry(e).map_err(|e| anyhow::Error::msg(format!("Failed to parse entry table ({:?})", e)))?;

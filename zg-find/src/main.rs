@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
 
     match args.command {
         GoodToolsVersion::New { crc ,sha1 , name } => {
-            let (res, out) = find_new(&binary, &crc, &sha1, &name)?;
+            let (res, out) = find_new(&binary, &crc, &sha1, &name, args.base_address as usize)?;
             if args.print_args {
                 println!(r#"-c {:08x} -s {:08x} -n {:08x} -k {} "{}""#, res.crc_off.unwrap_or(0), res.sha1_off.unwrap_or(0), res.name_off.unwrap_or(0), res.known_num.unwrap_or(0), &args.exe.as_os_str().to_string_lossy())
             } else {
@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
             }
         },
         GoodToolsVersion::Old { crc, name} => {
-            let (res, out) = find_old(&binary, crc, name)?;
+            let (res, out) = find_old(&binary, crc, name, args.base_address as usize)?;
             if args.print_args {
                 println!(r#"-e {:08x} -k {} "{}""#, res.crc_off.unwrap_or(0), res.known_num.unwrap_or(0), &args.exe.as_os_str().to_string_lossy())
             } else {
@@ -54,14 +54,14 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-fn find_old(binary: &[u8], crc: Option<[u8; 4]>, name: Option<String>) -> anyhow::Result<(SearchResult, String)> {
+fn find_old(binary: &[u8], crc: Option<[u8; 4]>, name: Option<String>, base: usize) -> anyhow::Result<(SearchResult, String)> {
     let mut out = String::new();
     let mut crc_off = None;
     let mut known_num = None;
     if let Some(crc) = crc {
     let crc_str = format!("{:08x}", u32::from_le_bytes(crc));
         for idx in memmem::find_iter(&binary, &crc_str.as_bytes()) {
-            let byte_addr = ((idx + 0x400c00) as u32).to_le_bytes();
+            let byte_addr = ((idx + base) as u32).to_le_bytes();
             for idx in memmem::find_iter(&binary, &byte_addr) {
                 writeln!(out, "Entry: {:08x}", idx)?;
                 if crc_off.is_none() {
@@ -71,7 +71,7 @@ fn find_old(binary: &[u8], crc: Option<[u8; 4]>, name: Option<String>) -> anyhow
         }
     } else if let Some(name) = name.as_ref() {
         for idx in memmem::find_iter(&binary, name.as_bytes()) {
-            let byte_addr = ((idx - 0x9 + 0x400c00) as u32).to_le_bytes();
+            let byte_addr = ((idx - 0x9 + base) as u32).to_le_bytes();
             for idx in memmem::find_iter(&binary, &byte_addr) {
                 writeln!(out, "Entry: {:08x}", idx)?;
                 if crc_off.is_none() {
@@ -83,7 +83,7 @@ fn find_old(binary: &[u8], crc: Option<[u8; 4]>, name: Option<String>) -> anyhow
 
     
     for idx in memmem::find_iter(&binary, STAT_STR.as_bytes()) {
-        let byte_addr = ((idx + 0x400c00) as u32).to_le_bytes();
+        let byte_addr = ((idx + base) as u32).to_le_bytes();
         if let Some(idx) =  memmem::find_iter(&binary, &byte_addr).next() {
             // 2 PUSH (0x68) before this
             if let Some(push_idx) = memmem::rfind_iter(&binary[..idx], &[0x68]).nth(1) {
@@ -101,7 +101,7 @@ fn find_old(binary: &[u8], crc: Option<[u8; 4]>, name: Option<String>) -> anyhow
     Ok((SearchResult { crc_off, sha1_off: None, name_off: None, known_num }, out))
 }
 
-fn find_new(binary: &[u8], crc: &[u8; 4], sha1: &[u8; 20], name: &str) -> anyhow::Result<(SearchResult, String)> {
+fn find_new(binary: &[u8], crc: &[u8; 4], sha1: &[u8; 20], name: &str, base: usize) -> anyhow::Result<(SearchResult, String)> {
     let mut crc_off = None;
     let mut sha1_off = None;
     let mut name_off = None;
@@ -120,7 +120,7 @@ fn find_new(binary: &[u8], crc: &[u8; 4], sha1: &[u8; 20], name: &str) -> anyhow
         }
     }
     for idx in memmem::find_iter(&binary, name.as_bytes()) {
-        let byte_addr = ((idx + 0x400c00) as u32).to_le_bytes();
+        let byte_addr = ((idx + base) as u32).to_le_bytes();
         for idx in memmem::find_iter(&binary, &byte_addr) {
             writeln!(out, "Name: {:08x}", idx)?;
             if name_off.is_none() {
@@ -130,7 +130,7 @@ fn find_new(binary: &[u8], crc: &[u8; 4], sha1: &[u8; 20], name: &str) -> anyhow
     }
 
     for idx in memmem::find_iter(&binary, STAT_STR.as_bytes()) {
-        let byte_addr = ((idx + 0x400c00) as u32).to_le_bytes();
+        let byte_addr = ((idx + base) as u32).to_le_bytes();
         if let Some(idx) =  memmem::find_iter(&binary, &byte_addr).next() {
             // 2 PUSH (0x68) before this
             if let Some(push_idx) = memmem::rfind_iter(&binary[..idx], &[0x68]).nth(1) {
