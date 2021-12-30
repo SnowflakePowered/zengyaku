@@ -47,5 +47,8 @@ No, zengyaku is a source-only distribution. If you have trouble setting up a Rus
 ### Will you publish the extracted database?
 Please take a look at [OpenGood](https://github.com/SnowflakePowered/opengood) and see if that would better fit your use case. While there are some missing ROMs owing to the nature of how OpenGood's data was collected, OpenGood provides additional information like file size and MD5 hashes as well. Publishing a database extracted directly from GoodTools is clearly in violation of clause 3 of the GoodTools license.
 
+### What's the difference between an old-style and new-style database?
+As a rule of thumb, new-style databases are used in V3.2x-tools, with older tools using the old-style database. To know for sure, you may need to try `zg-find` a few times until the resulting offsets make sense. New-style databases store hashes in separate contiguous binary arrays, whereas old-style databases is an array of strings containing ASCII-encoded hash information. `zg-dump` can handle both formats, but the proper offsets must be supplied. 
+
 ## Legal
 zengyaku is licensed under the MIT License and is provided for educational purposes only.
