@@ -1,5 +1,5 @@
 use std::{path::PathBuf, num::ParseIntError, ffi::OsStr};
-use clap::{Parser, ArgEnum};
+use clap::{Parser, Subcommand, ArgGroup};
 use bytes::BufMut;
 
 fn validate_file_exists(s: &OsStr) -> Result<PathBuf, std::io::Error> {
@@ -37,12 +37,7 @@ fn try_hex_to_sha(s: &str) -> Result<[u8; 20], anyhow::Error> {
     Ok(buf)
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
-pub(crate) enum OutputFormat {
-    None,
-    Tsv,
-    Xml,
-}
+
 
 /// zengyaku-find: GoodTools Address Finder
 #[derive(Parser, Debug)]
@@ -50,21 +45,45 @@ pub(crate) enum OutputFormat {
 pub(crate) struct Args {
     /// The path to the executable to search.
     #[clap(parse(try_from_os_str = validate_file_exists))]
-    pub(crate) exe: PathBuf,
-
-    /// The CRC32 value to search for.
-    #[clap(short, long, parse(try_from_str = try_hex_to_crc))]
-    pub(crate) crc: [u8; 4],
-
-    /// The SHA1 value to search for.
-    #[clap(short, long, parse(try_from_str = try_hex_to_sha))]
-    pub(crate) sha1: [u8; 20],
-
-    /// The name string to search for.
-    #[clap(short, long)]
-    pub(crate) name: String,
+    pub(crate) exe: PathBuf,    
 
     /// Output command-line arguments for zg-dump.
     #[clap(short='C', long)]
     pub(crate) print_args: bool,
+
+    #[clap(subcommand)]
+    pub(crate) command: GoodToolsVersion
+}
+
+#[derive(Debug, Subcommand)]
+pub(crate) enum GoodToolsVersion {
+    /// Find offsets for a version 3.2x database
+    New {
+        /// The CRC32 value to search for.
+        #[clap(short, long, parse(try_from_str = try_hex_to_crc))]
+        crc: [u8; 4],
+
+        /// The SHA1 value to search for.
+        #[clap(short, long, parse(try_from_str = try_hex_to_sha))]
+        sha1: [u8; 20],
+
+        /// The name string to search for.
+        #[clap(short, long)]
+        name: String,
+    },
+    /// Find offsets for a version 1 database
+    #[clap(group(
+        ArgGroup::new("v1")
+            .required(true)
+            .args(&["crc", "name"]),
+    ))]
+    Old {
+        /// The CRC32 value to search for.
+        #[clap(short, long, parse(try_from_str = try_hex_to_crc))]
+        crc: Option<[u8; 4]>,
+
+        /// The name string to search for.
+        #[clap(short, long)]
+        name: Option<String>,
+    }
 }

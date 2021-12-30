@@ -2,62 +2,36 @@
 
 GoodTools reverse engineering research project. 
 
-## Suite
-`zg` tools only work with **unpacked** GoodTools executables. The executable can be unpacked with [x32dbg](https://x64dbg.com) and the Scylla plugin.
-
-### zg-find
-Tries to find offsets given the CRC32, SHA1, and name of the first entry. 
-The first entry is the first line in the `*Miss.txt` file when GoodTools is ran within an empty folder. 
-The hash of the first entry can be found with [OpenGood](https://github.com/SnowflakePowered/opengood), unless if the first entry is missing; in that case, it will have to be determined manually with a reverse engineering suite.
-
-```
-zengyaku-find: GoodTools Address Finder
-
-USAGE:
-    zg-find.exe [OPTIONS] --crc <CRC> --sha1 <SHA1> --name <NAME> <EXE>
-
-ARGS:
-    <EXE>    The path to the executable to search
-
-OPTIONS:
-    -c, --crc <CRC>      The CRC32 value to search for
-    -C, --print-args     Output command-line arguments for zg-dump
-    -h, --help           Print help information
-    -n, --name <NAME>    The name string to search for
-    -s, --sha1 <SHA1>    The SHA1 value to search for
-    -V, --version        Print version information
-```
-
-### zg-dump
-Dumps CRC32 and SHA1 hashes given the known offsets of each table and the number of known ROMs.
-
-```
-zengyaku-dump: GoodTools database dumper
-
-USAGE:
-    zg-dump.exe [OPTIONS] --crc-off <CRC_OFF> --sha1-off <SHA1_OFF> --name-off <NAME_OFF> --known-num <KNOWN_NUM> <EXE>
-
-ARGS:
-    <EXE>    The path to the executable to dump
-
-OPTIONS:
-    -c, --crc-off <CRC_OFF>        The offset of the CRC32 table
-    -e, --extension <EXTENSION>    The extension to use when saving an Logiqx XML file; if omitted, emits no file extensions in the resulting `rom` entries [default: ]
-    -f, --format <FORMAT>          The format to output results [default: none] [possible values: none, tsv, xml]
-    -h, --help                     Print help information
-    -k, --known-num <KNOWN_NUM>    The total number of known ROMs
-    -n, --name-off <NAME_OFF>      The offset of the name table
-    -o, --output <OUTPUT>          The path to write output; if omitted, outputs to stdout
-    -s, --sha1-off <SHA1_OFF>      The offset of the SHA1 table
-    -V, --version                  Print version information
-```
-
 ## Instructions
 
 1. Unpack the GoodTools executable using your method of choice. [x32dbg](https://x64dbg.com) is suggested but not required.
-2. Find the hash details of the first entry with [OpenGood](https://github.com/SnowflakePowered/opengood) or manually with Ghidra or IDA Pro.
+2. Find the hash details of the first entry with [OpenGood](https://github.com/SnowflakePowered/opengood) or manually with Ghidra or IDA Pro. If the tool you are dumping is an old-style database, you may only need the CRC32 or name of the first entry.
 3. Use `zg-find` to find the offsets of the first entry.
 4. Use `zg-dump` to dump the database once the offsets are found.
+
+`zg` tools only work with **unpacked** GoodTools executables. The executable can be unpacked with [x32dbg](https://x64dbg.com) and the Scylla plugin.
+
+### zg-find
+
+Helper to find offsets for the embedded database. For 'old-style' databases (generally prior to 3.2x), only the CRC32 or the name of the first entry is needed. For 'new style databases (3.2x+), all of the CRC32, SHA1, and name of the first entry is needed.
+The first entry is the entry listed in first line in the `*Miss.txt` file when GoodTools is ran within an empty folder. 
+Any necessary hashes for 'new-style' databases can be looked up with [OpenGood](https://github.com/SnowflakePowered/opengood) unless if the first entry is missing; in that case, it will have to be determined manually with a reverse engineering suite.
+
+For example, to find offsets for GoodWSx (new-style)
+```bash
+$ zg-dump "GoodWSx_unpacked.exe" new --crc "2cbe41a6" --sha1 "28a0e1bccc4c10a57379f87c67c6c5ecf07fb0f4" --name "#Wonderwitch Promo Beta Demo by Dox (PD)"     
+```
+
+For GoodPico (old-style)
+```bash
+$ zg-find "GoodPico_unpacked.exe" old --crc "d62e3372"
+```
+
+A line of command arguments that can be pasted directly to `zg-dump` can be outputted with the `-C` flag.
+
+### zg-dump
+Dumps CRC32 and SHA1 hashes given the known offsets of each table and the number of known ROMs. Generally you should find offsets with `zg-find -C` and pipe the resulting command line arguments into `zg-dump`. 
+`zg-dump` can also output Logiqx XML or TSV with the `-f` flag and `-o` flag to right output to a file. See `zg-dump --help` for more information.
 
 ## Frequently Asked Questions
 

@@ -4,6 +4,6 @@ pub struct SHA1(pub [u8; 20]);
 
 pub struct Entry {
     pub crc: CRC32,
-    pub sha1: SHA1,
+    pub sha1: Option<SHA1>,
     pub name: String
 }

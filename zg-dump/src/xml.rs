@@ -46,7 +46,9 @@ pub(crate) fn write_xml(entries: &[Entry], ext: &str, src: &str) -> Result<Strin
             let crc =format!("{:08x}", e.crc.0);
             rom.push_attribute((b"name" as &[u8], rom_name.as_bytes()));
             rom.push_attribute(("crc", crc.as_str()));
-            rom.push_attribute(("sha1", hex::encode(e.sha1.0).as_str()));
+            if let Some(sha1) = &e.sha1 {
+                rom.push_attribute(("sha1", hex::encode(sha1.0).as_str()));
+            }
 
             writer.write_event(Event::Empty(rom))?; 
         }
