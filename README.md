@@ -31,7 +31,7 @@ A line of command arguments that can be pasted directly to `zg-dump` can be outp
 
 ### zg-dump
 Dumps CRC32 and SHA1 hashes given the known offsets of each table and the number of known ROMs. Generally you should find offsets with `zg-find -C` and pipe the resulting command line arguments into `zg-dump`. 
-`zg-dump` can also output Logiqx XML or TSV with the `-f` flag and `-o` flag to right output to a file. See `zg-dump --help` for more information.
+`zg-dump` can also output Logiqx XML or TSV with the `-f` flag and `-o` flag to write output to a file. See `zg-dump --help` for more information.
 
 ## Frequently Asked Questions
 
